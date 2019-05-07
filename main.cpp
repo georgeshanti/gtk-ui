@@ -41,8 +41,8 @@ int main (int argc, char *argv[])
     dispatcher.connect([&](){
         myMutex.lock();
         // cv::cvtColor(frame, outImage, cv::COLOR_BGR2RGB);
-        hello.img.set(Gdk::Pixbuf::create_from_data(outImage.data, Gdk::COLORSPACE_RGB, false, 8, outImage.cols, outImage.rows, outImage.step));
-        hello.img.queue_draw();
+        hello.img.img.set(Gdk::Pixbuf::create_from_data(outImage.data, Gdk::COLORSPACE_RGB, false, 8, outImage.cols, outImage.rows, outImage.step));
+        hello.img.img.queue_draw();
         myMutex.unlock();
     });
     // gdk_threads_leave();
