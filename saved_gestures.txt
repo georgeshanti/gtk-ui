@@ -1,0 +1,6 @@
+2 3 "xdotool click 5"
+2 4 "xdotool click 4"
+2 2 "xdotool keydown shift && xdotool click 4 && xdotool keyup shift"
+2 1 "xdotool keydown shift && xdotool click 5 && xdotool keyup shift"
+4 3 "xdotool key super"
+4 4 "xdotool key super+d"

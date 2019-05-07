@@ -1,0 +1,7 @@
+cmake_install.cmake_install
+.vscode/*
+CMakeFiles/*
+!.gitignore
+CMakeCache.txt
+ColourDetection
+Makefile
