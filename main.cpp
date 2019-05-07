@@ -18,13 +18,13 @@ void run(GuiSettings *h) {
     int a=0;
     while (a==0) {
         // a++;
-        myMutex.lock();
+        // myMutex.lock();
         capture >> frame;
         cv::cvtColor(frame, outImage, cv::COLOR_BGR2RGB);
         // h->img.set(Gdk::Pixbuf::create_from_data(outImage.data, Gdk::COLORSPACE_RGB, false, 8, outImage.cols, outImage.rows, outImage.step));
         // h->img.queue_draw();
         // std::cout<<"Hello";
-        myMutex.unlock();
+        // myMutex.unlock();
         // cv::waitKey(0);
         dispatcher.emit();
     }
