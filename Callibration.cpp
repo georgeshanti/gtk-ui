@@ -1,9 +1,11 @@
 #include "GuiSettings.hpp"
 
-Callibration::Callibration():Gtk::Box(Gtk::ORIENTATION_VERTICAL), h_label(), s_label(), v_label(),
+Callibration::Callibration(std::map<char,std::pair<int,int>> *h):Gtk::Box(Gtk::ORIENTATION_VERTICAL), h_label(), s_label(), v_label(),
 h_min_scale(), s_min_scale(), v_min_scale(),
 h_max_scale(), s_max_scale(), v_max_scale(),
 ch_box(), cv_box(Gtk::ORIENTATION_VERTICAL), cbh_box(){
+
+  hsv_values = h;
 
   Gdk::RGBA orange;
   orange.set_rgba((double)241/255,(double)132/255,(double)88/255);
@@ -62,4 +64,17 @@ ch_box(), cv_box(Gtk::ORIENTATION_VERTICAL), cbh_box(){
   ch_box.show();
   cv_box.show();
   cbh_box.show();
+}
+
+void Callibration::draw(){
+
+  h_min_scale.set_value((*hsv_values)['h'].first);
+  h_max_scale.set_value((*hsv_values)['h'].second);
+
+  s_min_scale.set_value((*hsv_values)['s'].first);
+  s_max_scale.set_value((*hsv_values)['s'].second);
+
+  v_min_scale.set_value((*hsv_values)['v'].first);
+  v_max_scale.set_value((*hsv_values)['v'].second);
+  // show_all();s`
 }

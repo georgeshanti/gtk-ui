@@ -1,7 +1,10 @@
 #include "GuiSettings.hpp"
 #include <iostream>
-AddWindow::AddWindow()
+
+AddWindow::AddWindow(std::vector<Gesture> ges, List *li):add_button("ADD"), cancel_button("CANCEL"), grid(), command(),
+hbox(), vbox(Gtk::ORIENTATION_VERTICAL)
 {
+  l=li;
   set_title("ComboBox example");
 
   //Create the Tree model:
@@ -10,41 +13,19 @@ AddWindow::AddWindow()
   m_Combo.set_model(m_refTreeModel);
 
   //Fill the ComboBox's Tree Model:
-  Gtk::TreeModel::Row row = *(m_refTreeModel->append());
-  row[m_Columns.m_col_id] = 1;
-  row[m_Columns.m_col_name] = "Billy Bob";
-  row[m_Columns.m_col_extra] = "something";
-  m_Combo.set_active(row);
-  /*
-  Gtk::TreeModel::Row childrow = *(m_refTreeModel->append(row.children()));
-  childrow[m_Columns.m_col_id] = 11;
-  childrow[m_Columns.m_col_name] = "Billy Bob Junior";
+  int i=0;
+  for(auto s=ges.begin() ; s!=ges.end() ; s++){
+    g[i] = *s;
+    Gtk::TreeModel::Row row = *(m_refTreeModel->append());
+    row[m_Columns.m_col_id] = i;
+    row[m_Columns.m_col_name] = (*s).name();
+    row[m_Columns.m_col_extra] = " ";
+    if(i==0)
+      m_Combo.set_active(row);
+    i++;
+  }
 
-  childrow = *(m_refTreeModel->append(row.children()));
-  childrow[m_Columns.m_col_id] = 12;
-  childrow[m_Columns.m_col_name] = "Sue Bob";
-  */
-
-  row = *(m_refTreeModel->append());
-  row[m_Columns.m_col_id] = 2;
-  row[m_Columns.m_col_name] = "Joey Jojo";
-  row[m_Columns.m_col_extra] = "yadda";
-
-
-  row = *(m_refTreeModel->append());
-  row[m_Columns.m_col_id] = 3;
-  row[m_Columns.m_col_name] = "Rob McRoberts";
-  row[m_Columns.m_col_extra] = "";
-
-  /*
-  childrow = *(m_refTreeModel->append(row.children()));
-  childrow[m_Columns.m_col_id] = 31;
-  childrow[m_Columns.m_col_name] = "Xavier McRoberts";
-  */
-
-  //Add the model columns to the Combo (which is a kind of view),
-  //rendering them in the default way:
-  m_Combo.pack_start(m_Columns.m_col_id);
+  // m_Combo.pack_start(m_Columns.m_col_id);
   m_Combo.pack_start(m_Columns.m_col_name);
 
   //An example of adding a cell renderer manually,
@@ -55,10 +36,21 @@ AddWindow::AddWindow()
   m_Combo.pack_start(m_cell);
 
   //Add the ComboBox to the window.
-  add(m_Combo);
+  grid.set_column_homogeneous(TRUE);
+  grid.set_row_spacing(10);
+  grid.set_column_spacing(10);
+
+  grid.attach(m_Combo, 0, 0, 2, 1);
+  grid.attach(command, 0, 1, 2, 1);
+  grid.attach(cancel_button, 0, 2, 1, 1);
+  grid.attach(add_button, 1, 2, 1, 1);
+  hbox.pack_start(grid, TRUE, TRUE, 10);
+  vbox.pack_start(hbox, TRUE, TRUE, 10);
+  add(vbox);
 
   //Connect signal handler:
-  m_Combo.signal_changed().connect( sigc::mem_fun(*this, &AddWindow::on_combo_changed) );
+  add_button.signal_clicked().connect( sigc::mem_fun(*this, &AddWindow::added) );
+  cancel_button.signal_clicked().connect( sigc::mem_fun(*this, &AddWindow::hide) );
 
   show_all_children();
 }
@@ -84,8 +76,7 @@ void AddWindow::on_cell_data_extra(const Gtk::TreeModel::const_iterator& iter)
   m_cell.property_foreground() = (extra == "yadda" ? "red" : "green");
 }
 
-void AddWindow::on_combo_changed()
-{
+void AddWindow::added(){
   Gtk::TreeModel::iterator iter = m_Combo.get_active();
   if(iter)
   {
@@ -97,7 +88,9 @@ void AddWindow::on_combo_changed()
       int id = row[m_Columns.m_col_id];
       Glib::ustring name = row[m_Columns.m_col_name];
 
-      std::cout << " ID=" << id << ", name=" << name << std::endl;
+      std::cout << name << command.get_text() << std::endl;
+      l->add_gesture(g[id], command.get_text());
+      hide();
     }
   }
   else

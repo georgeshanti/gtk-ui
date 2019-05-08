@@ -1,10 +1,84 @@
 #include "GuiSettings.hpp"
-
+#include<iostream>
 std::regex num("[0-9]+");
 std::regex alpha("[alpha]+");
 
+void List::draw(){
+  list_window.remove();
+  list = Gtk::ListBox();
+
+  list_map.clear();
+  gesture_map.clear();
+  int i=0;
+  for(auto s=gestures.begin();s!=gestures.end();s++){
+    if(s->second=="")
+      continue;
+    auto row = new GestureItem(s->first, s->second);
+    
+    gesture_map[i] = s->first;
+    list.append(*row);
+    i++;
+  }
+  list.show_all();
+
+  list_window.add(list);
+
+}
+
+void List::delete_gesture(){
+  auto row = list.get_selected_row();
+  int i = row->get_index();
+  gestures.erase(gesture_map[i]);
+  
+  draw();
+}
+
+void List::open_add_window()
+{
+  std::cout<<"Entered\n";
+  if(add_window != 0)
+    return;
+  std::cout<<"Add window\n";
+
+  std::vector<Gesture> ges;
+  for(auto s=gestures.begin();s!=gestures.end();s++){
+    if(s->second!="")
+      continue;
+    ges.push_back(s->first);
+  }
+  
+  add_window = new AddWindow(ges, this);
+  add_window->signal_hide().connect(sigc::mem_fun(*this, &List::aboutWinClose));
+  add_window->show();
+}
+
+void List::open_edit_window()
+{
+  auto row = list.get_selected_row();
+  int i = row->get_index();
+  Gesture g = gesture_map[i];
+  edit_window = new EditWindow(g, gestures[g], this);
+  edit_window->signal_hide().connect(sigc::mem_fun(*this, &List::aboutWinClose));
+  edit_window->show();
+}
+
+void List::aboutWinClose()
+{
+  delete add_window;
+  add_window = 0;
+  delete edit_window;
+  edit_window = 0;
+}
+
 List::List(): Gtk::Box(Gtk::ORIENTATION_VERTICAL), lbh_box(), gestures(), list_window(),
-add_button("ADD"), edit_button("EDIT"), remove_button("REMOVE"), list_grid(), list(){
+add_button("ADD"), edit_button("EDIT"), remove_button("REMOVE"), list_grid(), list(), list_map(), gesture_map(){
+
+  add_button.signal_clicked().connect( sigc::mem_fun(*this, &List::open_add_window) );
+  edit_button.signal_clicked().connect( sigc::mem_fun(*this, &List::open_edit_window) );
+  remove_button.signal_clicked().connect( sigc::mem_fun(*this, &List::delete_gesture) );
+
+  add_window = 0;
+  edit_window = 0;
 
   Gdk::RGBA orange;
   orange.set_rgba((double)241/255,(double)132/255,(double)88/255);
@@ -36,14 +110,8 @@ add_button("ADD"), edit_button("EDIT"), remove_button("REMOVE"), list_grid(), li
     gestures[g]=line;
   }
 
-  for(auto s=gestures.begin();s!=gestures.end();s++){
-    if(s->second=="")
-      continue;
-    auto row = new GestureItem(s->first, s->second);
-    list.append(*row);
-  }
+  draw();
 
-  list_window.add(list);
   list_window.set_min_content_width(400);
   list_window.set_min_content_height(600);
   // list_window.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_ALWAYS);
@@ -87,5 +155,5 @@ add_button("ADD"), edit_button("EDIT"), remove_button("REMOVE"), list_grid(), li
   lbv_box.show();
   lbh_box.show();
 
-  list.show_all();
+  // list.show_all();
 }

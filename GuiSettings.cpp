@@ -11,26 +11,15 @@
 #include <gtkmm/cssprovider.h>
 // #include <gtkmm/color.h>
 
-void GuiSettings::on_button_clicked()
+GuiSettings::GuiSettings(): img(), window_grid(),
+hsv_values(), list_box(), call("CALLIBRATE"), set("SET COLORS"), save("SAVE")
 {
-  std::cout<<"Entered\n";
-  if(add_window != 0)
-    return;
-  std::cout<<"Add window\n";
-  add_window = new AddWindow;
-  add_window->signal_hide().connect(sigc::mem_fun(*this, &GuiSettings::aboutWinClose));
-  add_window->show();
-}
-
-void GuiSettings::aboutWinClose()
-{
-    add_window = 0;
-}
-
-GuiSettings::GuiSettings(): img(), window_grid(), callibration(),
-hsv_values()
-{
-  add_window = 0;
+  list_box.parent(this);
+  callibration = new Callibration(&hsv_values);
+  // add_window = 0;
+  call.signal_clicked().connect( sigc::mem_fun(*this, &GuiSettings::call_colors) );
+  set.signal_clicked().connect( sigc::mem_fun(*this, &GuiSettings::set_colors) );
+  save.signal_clicked().connect( sigc::mem_fun(*this, &GuiSettings::save_func) );
 
   std::ifstream config;
   config.open("./config.txt");
@@ -54,28 +43,16 @@ hsv_values()
     int high;
     std::stringstream(setting)>>high;
     hsv_values[f] = std::pair<int,int>(low,high);
-    std::cout<<f<<":"<<low<<":"<<high<<std::endl;
+    // std::cout<<f<<":"<<low<<":"<<high<<std::endl;
   }
+  config.close();
+
+  callibration->draw();
 
   // Sets the border width of the window.
   set_border_width(10);
   window_grid.set_row_spacing(10);
   window_grid.set_column_spacing(10);
-
-  // h_min_scale.set_range(0,179);
-  // h_min_scale.set_value(hsv_values['h'].first);
-  // h_max_scale.set_range(0,179);
-  // h_max_scale.set_value(hsv_values['h'].second);
-
-  // s_min_scale.set_range(0,255);
-  // s_min_scale.set_value(hsv_values['s'].first);
-  // s_max_scale.set_range(0,255);
-  // s_max_scale.set_value(hsv_values['s'].second);
-
-  // v_min_scale.set_range(0,255);
-  // v_min_scale.set_value(hsv_values['v'].first);
-  // v_max_scale.set_range(0,255);
-  // v_max_scale.set_value(hsv_values['v'].second);
 
   // list.spa
 
@@ -89,14 +66,19 @@ hsv_values()
   Gdk::RGBA orange;
   orange.set_rgba((double)241/255,(double)132/255,(double)88/255);
 
-  // add_button.signal_clicked().connect( sigc::mem_fun(*this, &GuiSettings::on_button_clicked) );
+  window_grid.attach(*callibration, 0, 1, 1,1);
+  callibration->show();
 
-
-  window_grid.attach(callibration, 0, 1, 1,1);
-  callibration.show();
-
-  window_grid.attach(list_box, 1,0,1,2);
+  window_grid.attach(list_box, 1,0,4,2);
   list_box.show();
+
+  window_grid.attach(set, 2,2,1,1);
+  // set.show();
+  window_grid.attach(call, 3,2,1,1);
+  call.show();
+  window_grid.attach(save, 4,2,1,1);
+  save.show();
+
 
   Gdk::RGBA c;
   c.set_rgba((double)249/255,(double)110/255,(double)5/255);
@@ -115,6 +97,45 @@ hsv_values()
 
 GuiSettings::~GuiSettings()
 {
+}
+
+void GuiSettings::call_colors(){
+  if(set_frame){
+    set_frame = FALSE;
+    set.hide();
+    call.set_label("CALLIBRATE");
+  }
+  else{
+    set_frame = TRUE;
+    set.show();
+    call.set_label("CANCEL");
+  }
+}
+
+void GuiSettings::set_colors(){
+  get_color = TRUE;
+  set.show();
+}
+
+void GuiSettings::save_func(){
+  std::ofstream config;
+  config.open("./config.txt");
+  for(auto s=hsv_values.begin() ; s!=hsv_values.end() ; s++){
+    std::string setting = s->first + std::string(" ") + std::to_string(s->second.first) + std::string(" ") + std::to_string(s->second.second) + std::string("\n");
+    config << setting;
+  }
+  config.close();
+
+
+  std::ofstream saved_gestures;
+  saved_gestures.open("./saved_gestures.txt");
+  for(auto s=list_box.gestures.begin() ; s!=list_box.gestures.end() ; s++){
+    if(s->second=="")
+      continue;
+    std::string setting = std::to_string(s->first.fingers) + std::string(" ") + std::to_string(s->first.direction) + std::string(" \"") + s->second + std::string("\"\n");
+    saved_gestures << setting;
+  }
+  saved_gestures.close();
 }
 
 #endif

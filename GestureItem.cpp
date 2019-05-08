@@ -1,11 +1,8 @@
 #include "GuiSettings.hpp"
 
-std::string fin[4] = {"One Finger", "Two Finger", "Three Finger", "Four Finger"};
-std::string dir[4] = {"Left Swipe", "Right Swipe", "Up Swipe", "Down Swipe"};
-
 GestureItem::GestureItem(Gesture g, std::string c):_gesture(g), command(c), grid(), vbox(Gtk::ORIENTATION_VERTICAL), hbox(){
   gesture = Gtk::Label();
-  gesture.set_markup("<span>"+fin[_gesture.fingers-1]+std::string(" ")+dir[_gesture.direction-1]+"</span>");
+  gesture.set_markup("<span>"+_gesture.name()+"</span>");
   function = Gtk::Label();
 
   int a,pos=0;

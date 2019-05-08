@@ -19,6 +19,6 @@ ADD_DEFINITIONS(${GTK3_CFLAGS_OTHER})
 
 include_directories( ${OpenCV_INCLUDE_DIRS} )
 
-add_executable( ColourDetection main.cpp GuiSettings.cpp Callibration.cpp GestureItem.cpp AddWindow.cpp List.cpp)
+add_executable( ColourDetection main.cpp GuiSettings.cpp Callibration.cpp GestureItem.cpp AddWindow.cpp EditWindow.cpp List.cpp Gesture.cpp)
 target_link_libraries( ColourDetection ${OpenCV_LIBS} ${GTK3_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} )
 add_definitions(${GTK_CFLAGS} ${GTK_CFLAGS_OTHER})
